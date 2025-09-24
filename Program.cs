@@ -13,12 +13,10 @@ namespace bai1
 
             using (var loginForm = new LoginForm())
             {
-                // N?u ??ng nh?p thành công thì m? Form1
                 if (loginForm.ShowDialog() == DialogResult.OK)
                 {
                     Application.Run(new Form1());
                 }
-                // N?u không thì thoát ?ng d?ng
             }
         }
     }
