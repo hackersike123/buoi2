@@ -24,9 +24,10 @@ namespace bai1
             btnOk.Click += (s, e) =>
             {
                 if (string.IsNullOrWhiteSpace(txtUser.Text)) { MessageBox.Show("Vui lòng nhập tài khoản"); return; }
-                var tmp = AuthService.ResetPassword(txtUser.Text.Trim());
-                if (tmp == null) { MessageBox.Show("Không tìm thấy tài khoản"); return; }
-                MessageBox.Show($"Mật khẩu tạm thời mới: {tmp}");
+                // Set default password to '1'
+                var ok = AuthService.SetPassword(txtUser.Text.Trim(), "1");
+                if (!ok) { MessageBox.Show("Không tìm thấy tài khoản"); return; }
+                MessageBox.Show("Mật khẩu đã được đặt về mặc định: 1");
                 this.Close();
             };
             btnCancel.Click += (s, e) => { this.Close(); };

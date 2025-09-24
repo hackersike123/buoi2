@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -84,6 +84,17 @@ namespace bai1
             u.PasswordHash = HashPassword(tmp);
             SaveUsers(users);
             return tmp;
+        }
+
+        // New: set user's password to a specific value
+        public static bool SetPassword(string username, string newPassword)
+        {
+            var users = LoadUsers();
+            var u = users.FirstOrDefault(x => string.Equals(x.Username, username, StringComparison.OrdinalIgnoreCase));
+            if (u == null) return false;
+            u.PasswordHash = HashPassword(newPassword);
+            SaveUsers(users);
+            return true;
         }
 
         private static string HashPassword(string pwd)
