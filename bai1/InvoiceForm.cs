@@ -26,5 +26,23 @@ namespace bai1
 
             this.Controls.Add(listBox1);
         }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // InvoiceForm
+            // 
+            this.ClientSize = new System.Drawing.Size(741, 337);
+            this.Name = "InvoiceForm";
+            this.Load += new System.EventHandler(this.InvoiceForm_Load);
+            this.ResumeLayout(false);
+
+        }
+
+        private void InvoiceForm_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

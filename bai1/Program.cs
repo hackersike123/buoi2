@@ -1,22 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace bai1
 {
-    internal static class Program
+    static class Program
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            using (var loginForm = new LoginForm())
+            {
+                // Nếu đăng nhập thành công thì mở Form1
+                if (loginForm.ShowDialog() == DialogResult.OK)
+                {
+                    Application.Run(new Form1());
+                }
+                // Nếu không thì thoát ứng dụng
+            }
         }
     }
+}
+
+// Add this class if it does not exist in your project
+public class LoginForm : Form
+{
+    // Implement your login logic here
 }
