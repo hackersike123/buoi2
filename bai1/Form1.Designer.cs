@@ -73,6 +73,7 @@
             this.groupBox16 = new System.Windows.Forms.GroupBox();
             this.groupBox9 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.lblScreen = new System.Windows.Forms.Label();
             this.groupBox44 = new System.Windows.Forms.GroupBox();
             this.lblTongTien = new System.Windows.Forms.Label();
             this.txtTongTien = new System.Windows.Forms.TextBox();
@@ -151,10 +152,12 @@
             this.groupBox1.Controls.Add(this.groupBox16);
             this.groupBox1.Controls.Add(this.groupBox9);
             this.groupBox1.Controls.Add(this.groupBox2);
+            this.groupBox1.Controls.Add(this.lblScreen);
             this.groupBox1.Cursor = System.Windows.Forms.Cursors.Arrow;
             resources.ApplyResources(this.groupBox1, "groupBox1");
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.TabStop = false;
+            this.groupBox1.Enter += new System.EventHandler(this.groupBox1_Enter);
             // 
             // groupBox43
             // 
@@ -407,6 +410,12 @@
             resources.ApplyResources(this.groupBox2, "groupBox2");
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.TabStop = false;
+            // 
+            // lblScreen
+            // 
+            resources.ApplyResources(this.lblScreen, "lblScreen");
+            this.lblScreen.BackColor = System.Drawing.Color.Silver;
+            this.lblScreen.Name = "lblScreen";
             // 
             // groupBox44
             // 
@@ -688,6 +697,8 @@
         private System.Windows.Forms.Button btnThoat;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ErrorProvider errorProvider1;
+        // designer screen label
+        private System.Windows.Forms.Label lblScreen;
     }
 }
 

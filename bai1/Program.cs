@@ -3,23 +3,29 @@ using System.Windows.Forms;
 
 namespace bai1
 {
-    static class Program
+    internal static class Program
     {
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
         [STAThread]
         static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            using (var loginForm = new LoginForm())
+            // Show login dialog before starting main form
+            using (var login = new LoginForm())
             {
-                // Nếu đăng nhập thành công thì mở Form1
-                if (loginForm.ShowDialog() == DialogResult.OK)
+                var result = login.ShowDialog();
+                if (result != DialogResult.OK)
                 {
-                    Application.Run(new Form1());
+                    // Exit if login cancelled or failed
+                    return;
                 }
-                // Nếu không thì thoát ứng dụng
             }
+
+            Application.Run(new Form1());
         }
     }
 }

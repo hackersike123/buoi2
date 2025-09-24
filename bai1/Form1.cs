@@ -5,10 +5,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Globalization;
-using System.Text.RegularExpressions;
 
 namespace bai1
 {
@@ -28,23 +25,22 @@ namespace bai1
             InitializeComponent();
             NumberSeats();
 
-            // Add tooltips and tags to groupboxes for easier identification at runtime
+            // Note: lblScreen is created in Designer so no runtime creation here.
+
+            // Add tooltips to groupboxes for easier identification at runtime
             var tip = new ToolTip();
-            // top-level groupboxes
+            // top-level groupboxes (do not overwrite Tag which is used for seat selection)
             foreach (var gb in this.Controls.OfType<GroupBox>())
             {
                 tip.SetToolTip(gb, gb.Name);
-                gb.Tag = gb.Name;
             }
             // nested seat groupboxes inside groupBox1
             foreach (var gb in groupBox1.Controls.OfType<GroupBox>())
             {
                 tip.SetToolTip(gb, gb.Name);
-                gb.Tag = gb.Name;
             }
 
             cbGender.SelectedIndex = -1;
-            // removed rbVeDon/rbVeDoi usage - pricing is per-seat only
 
             // Button texts
             if (btnChonGhe != null) btnChonGhe.Text = "Chọn";
@@ -55,7 +51,6 @@ namespace bai1
 
             // events
             txtProvince.TextChanged += (s, e) => UpdateTongTien();
-            // removed rbVeDon/rbVeDoi event subscriptions
         }
 
         private void NumberSeats()
@@ -77,7 +72,9 @@ namespace bai1
                 var existing = gb.Controls.OfType<Label>().FirstOrDefault(x => x.Name == "seatLabel");
                 if (existing != null)
                 {
-                    existing.Text = seatNumber.ToString();
+                    // Do not overwrite designer-set label text; only set if empty
+                    if (string.IsNullOrWhiteSpace(existing.Text))
+                        existing.Text = seatNumber.ToString();
                     AttachSeatHandlers(gb, existing);
                     seatNumber++;
                     continue;
@@ -99,6 +96,7 @@ namespace bai1
                 if (_seatDefaultBack == default(Color))
                     _seatDefaultBack = gb.BackColor;
 
+                // Tag stores selection state (bool)
                 gb.Tag = false;
 
                 AttachSeatHandlers(gb, lbl);
@@ -221,6 +219,9 @@ namespace bai1
             };
             _invoices.Add(invoice);
 
+            // Update any open invoice form
+            _invoiceFormInstance?.UpdateInvoices(_invoices);
+
             // add to grid
             try
             {
@@ -269,6 +270,9 @@ namespace bai1
 
                     var inv = _invoices.FirstOrDefault(i => i.Name == name && i.CCCD == cccd && i.Seats == seats);
                     if (inv != null) _invoices.Remove(inv);
+
+                    // Update any open invoice form
+                    _invoiceFormInstance?.UpdateInvoices(_invoices);
 
                     // free seats if any
                     if (!string.IsNullOrWhiteSpace(seats))
@@ -375,7 +379,6 @@ namespace bai1
         // Menu handler to open a single InvoiceForm
         private void menuOpenInvoiceForm_Click(object sender, EventArgs e)
         {
-            // If InvoiceForm is not available, show a message
             try
             {
                 if (_invoiceFormInstance == null || _invoiceFormInstance.IsDisposed)
@@ -385,12 +388,14 @@ namespace bai1
                 }
                 else
                 {
+                    // refresh existing instance and bring to front
+                    _invoiceFormInstance.UpdateInvoices(_invoices);
                     _invoiceFormInstance.BringToFront();
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                MessageBox.Show("Invoice form chưa được triển khai.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Invoice form lỗi: {ex.Message}", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
@@ -400,6 +405,11 @@ namespace bai1
         }
 
         private void lblTongTien_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupBox1_Enter(object sender, EventArgs e)
         {
 
         }

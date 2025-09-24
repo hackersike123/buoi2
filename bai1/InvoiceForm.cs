@@ -8,9 +8,12 @@ namespace bai1
     public class InvoiceForm : Form
     {
         private ListBox listBox1;
+        private List<Invoice> _invoices;
 
         public InvoiceForm(List<Invoice> invoices)
         {
+            _invoices = invoices ?? new List<Invoice>();
+
             this.Text = "Danh sách hóa ??n";
             this.StartPosition = FormStartPosition.CenterParent;
             this.Size = new Size(600, 400);
@@ -19,12 +22,35 @@ namespace bai1
             listBox1.Dock = DockStyle.Fill;
             listBox1.Font = new Font("Consolas", 10);
 
-            foreach (var inv in invoices)
+            PopulateList();
+
+            this.Controls.Add(listBox1);
+        }
+
+        private void PopulateList()
+        {
+            listBox1.Items.Clear();
+            foreach (var inv in _invoices)
             {
                 listBox1.Items.Add($"Tên: {inv.Name} | CCCD: {inv.CCCD} | Gh?: {inv.Seats} | T?ng: {inv.Total:N0}");
             }
+        }
 
-            this.Controls.Add(listBox1);
+        public void UpdateInvoices(List<Invoice> invoices)
+        {
+            _invoices = invoices ?? new List<Invoice>();
+            if (this.IsHandleCreated)
+            {
+                // if form created, update on UI thread
+                if (this.InvokeRequired)
+                {
+                    this.Invoke((MethodInvoker)PopulateList);
+                }
+                else
+                {
+                    PopulateList();
+                }
+            }
         }
 
         private void InitializeComponent()
