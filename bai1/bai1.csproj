@@ -47,6 +47,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AuthService.cs" />
+    <Compile Include="CustomerDetailDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="EditInvoiceDialog.cs">
       <SubType>Form</SubType>
     </Compile>

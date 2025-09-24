@@ -23,14 +23,42 @@ namespace bai1
         // seat details form
         private SeatDetailsForm _seatDetailsForm;
 
+        // seat info label
+        private Label lblSeatInfo;
+
         public Form1()
         {
             InitializeComponent();
+
+            // Do not execute runtime-only initialization at design time
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+
+            // make seat area scrollable and enlarge form for clarity
+            try
+            {
+                // GroupBox does not support AutoScroll; enable scrolling on the form instead
+                this.AutoScroll = true;
+                this.Size = new Size(Math.Max(this.Size.Width, 1000), Math.Max(this.Size.Height, 700));
+            }
+            catch { }
 
             // Load invoices from disk
             _invoices = InvoiceService.LoadInvoices();
 
             NumberSeats();
+
+            // Add seat info label to groupBox44 (controls panel)
+            lblSeatInfo = new Label();
+            lblSeatInfo.AutoSize = false;
+            lblSeatInfo.TextAlign = ContentAlignment.MiddleLeft;
+            lblSeatInfo.Width = 240;
+            lblSeatInfo.Height = 24;
+            lblSeatInfo.Location = new Point(8, 20);
+            lblSeatInfo.Font = new Font(lblSeatInfo.Font.FontFamily, 9F, FontStyle.Regular);
+            this.groupBox44.Controls.Add(lblSeatInfo);
+
+            UpdateSeatInfo();
 
             // populate grid from invoices
             RefreshGrid();
@@ -85,6 +113,16 @@ namespace bai1
             this.FormClosing += (s, e) => InvoiceService.SaveInvoices(_invoices);
         }
 
+        private void UpdateSeatInfo()
+        {
+            if (lblSeatInfo == null) return;
+            var seatBoxes = groupBox1.Controls.OfType<GroupBox>().Where(gb => gb != groupBox44 && gb != groupBox51).ToList();
+            int total = seatBoxes.Count;
+            int reserved = seatBoxes.Count(g => !g.Enabled);
+            int available = total - reserved;
+            lblSeatInfo.Text = $"Tổng ghế: {total}  —  Đã đặt: {reserved}  —  Còn: {available}";
+        }
+
         private void NumberSeats()
         {
             var seatBoxes = groupBox1.Controls.OfType<GroupBox>()
@@ -136,6 +174,7 @@ namespace bai1
             }
 
             UpdateTongTien();
+            UpdateSeatInfo();
         }
 
         private void AttachSeatHandlers(GroupBox gb, Label lbl)
@@ -183,6 +222,7 @@ namespace bai1
             }
 
             UpdateTongTien();
+            UpdateSeatInfo();
         }
 
         private void UpdateTongTien()
@@ -282,6 +322,7 @@ namespace bai1
             txtProvince.Text = string.Empty;
 
             UpdateTongTien();
+            UpdateSeatInfo();
         }
 
         private void btnHuy_Click(object sender, EventArgs e)
@@ -330,6 +371,7 @@ namespace bai1
                 }
 
                 UpdateTongTien();
+                UpdateSeatInfo();
                 return;
             }
 
@@ -351,6 +393,7 @@ namespace bai1
             txtProvince.Text = string.Empty;
 
             UpdateTongTien();
+            UpdateSeatInfo();
         }
 
         private void btnThoat_Click(object sender, EventArgs e)
