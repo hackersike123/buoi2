@@ -20,21 +20,52 @@ namespace bai1
         // single invoice form instance
         private InvoiceForm _invoiceFormInstance;
 
+        // seat details form
+        private SeatDetailsForm _seatDetailsForm;
+
         public Form1()
         {
             InitializeComponent();
+
+            // Load invoices from disk
+            _invoices = InvoiceService.LoadInvoices();
+
             NumberSeats();
 
-            // Note: lblScreen is created in Designer so no runtime creation here.
+            // populate grid from invoices
+            RefreshGrid();
 
-            // Add tooltips to groupboxes for easier identification at runtime
+            // Context menu for dataGridView rows (edit/delete)
+            var cm = new ContextMenuStrip();
+            cm.Items.Add("Sửa").Click += (s, e) => EditSelectedInvoice();
+            cm.Items.Add("Xóa").Click += (s, e) => DeleteSelectedInvoice();
+            dataGridView1.ContextMenuStrip = cm;
+
+            // Add a button to open seat details (if not present, create a menu item)
+            var showSeatsBtn = new Button { Text = "Chi tiết Ghế", Width = 100, Height = 24 };
+            showSeatsBtn.Click += (s, e) =>
+            {
+                if (_seatDetailsForm == null || _seatDetailsForm.IsDisposed)
+                {
+                    _seatDetailsForm = new SeatDetailsForm(_invoices);
+                    _seatDetailsForm.Show(this);
+                }
+                else
+                {
+                    _seatDetailsForm.Populate(_invoices);
+                    _seatDetailsForm.BringToFront();
+                }
+            };
+            // add to groupBox44 for visibility
+            this.groupBox44.Controls.Add(showSeatsBtn);
+            showSeatsBtn.Location = new Point(260, 20);
+
+            // rest unchanged
             var tip = new ToolTip();
-            // top-level groupboxes (do not overwrite Tag which is used for seat selection)
             foreach (var gb in this.Controls.OfType<GroupBox>())
             {
                 tip.SetToolTip(gb, gb.Name);
             }
-            // nested seat groupboxes inside groupBox1
             foreach (var gb in groupBox1.Controls.OfType<GroupBox>())
             {
                 tip.SetToolTip(gb, gb.Name);
@@ -42,15 +73,16 @@ namespace bai1
 
             cbGender.SelectedIndex = -1;
 
-            // Button texts
             if (btnChonGhe != null) btnChonGhe.Text = "Chọn";
             if (btnHuy != null) btnHuy.Text = "Xóa";
             if (btnThoat != null) btnThoat.Text = "Thoát";
 
             UpdateTongTien();
 
-            // events
             txtProvince.TextChanged += (s, e) => UpdateTongTien();
+
+            // when closing, save invoices
+            this.FormClosing += (s, e) => InvoiceService.SaveInvoices(_invoices);
         }
 
         private void NumberSeats()
@@ -412,6 +444,95 @@ namespace bai1
         private void groupBox1_Enter(object sender, EventArgs e)
         {
 
+        }
+
+        private void RefreshGrid()
+        {
+            if (dataGridView1 == null) return;
+            dataGridView1.Rows.Clear();
+            foreach (var inv in _invoices)
+            {
+                dataGridView1.Rows.Add(inv.Name, inv.CCCD, inv.Gender, inv.Phone, inv.Province, inv.Seats, inv.Total.ToString("N0"));
+            }
+        }
+
+        private void EditSelectedInvoice()
+        {
+            if (dataGridView1 == null || dataGridView1.SelectedRows.Count == 0) return;
+            var row = dataGridView1.SelectedRows[0];
+            string name = row.Cells[0].Value?.ToString() ?? string.Empty;
+            string cccd = row.Cells[1].Value?.ToString() ?? string.Empty;
+            string seats = string.Empty;
+            try { seats = row.Cells[5].Value?.ToString() ?? string.Empty; } catch { }
+
+            var inv = _invoices.FirstOrDefault(i => i.Name == name && i.CCCD == cccd && i.Seats == seats);
+            if (inv == null) return;
+
+            using (var dlg = new EditInvoiceDialog(inv))
+            {
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    inv.Name = dlg.Invoice.Name;
+                    inv.Phone = dlg.Invoice.Phone;
+                    inv.Province = dlg.Invoice.Province;
+                    RefreshGrid();
+                    _invoiceFormInstance?.UpdateInvoices(_invoices);
+                }
+            }
+        }
+
+        private void DeleteSelectedInvoice()
+        {
+            if (dataGridView1 == null || dataGridView1.SelectedRows.Count == 0) return;
+            var row = dataGridView1.SelectedRows[0];
+            string name = row.Cells[0].Value?.ToString() ?? string.Empty;
+            string cccd = row.Cells[1].Value?.ToString() ?? string.Empty;
+            string seats = string.Empty;
+            try { seats = row.Cells[5].Value?.ToString() ?? string.Empty; } catch { }
+
+            var inv = _invoices.FirstOrDefault(i => i.Name == name && i.CCCD == cccd && i.Seats == seats);
+            if (inv != null)
+            {
+                _invoices.Remove(inv);
+                // free seats
+                if (!string.IsNullOrWhiteSpace(inv.Seats))
+                {
+                    var seatNums = inv.Seats.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries).Select(s => s.Trim());
+                    foreach (var sn in seatNums)
+                    {
+                        var gb = groupBox1.Controls.OfType<GroupBox>()
+                            .FirstOrDefault(g => g.Controls.OfType<Label>().Any(l => l.Name == "seatLabel" && l.Text == sn));
+                        if (gb != null)
+                        {
+                            gb.Enabled = true;
+                            gb.BackColor = _seatDefaultBack;
+                            var seatLbl = gb.Controls.OfType<Label>().FirstOrDefault(l => l.Name == "seatLabel");
+                            if (seatLbl != null) seatLbl.ForeColor = Color.Black;
+                        }
+                    }
+                }
+
+                _invoiceFormInstance?.UpdateInvoices(_invoices);
+            }
+
+            try { dataGridView1.Rows.Remove(row); } catch { }
+            UpdateTongTien();
+        }
+
+        private void ShowRegister()
+        {
+            using (var dlg = new RegisterDialog())
+            {
+                dlg.ShowDialog();
+            }
+        }
+
+        private void ShowReset()
+        {
+            using (var dlg = new ResetPasswordDialog())
+            {
+                dlg.ShowDialog();
+            }
         }
     }
 }

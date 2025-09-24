@@ -12,22 +12,19 @@ namespace bai1
 {
     public partial class LoginForm : Form
     {
-        // Default test credentials
-        private const string DefaultUser = "admin";
-        private const string DefaultPass = "123456";
-
         public LoginForm()
         {
             InitializeComponent();
 
-            // wire up events (designer did not add click handlers)
+            // wire up events
             this.btnLogin.Click += BtnLogin_Click;
             this.btnCancel.Click += BtnCancel_Click;
+
+            this.Text = "Đăng nhập";
         }
 
         private void BtnCancel_Click(object sender, EventArgs e)
         {
-            // Cancel closes the dialog with Cancel result
             this.DialogResult = DialogResult.Cancel;
             this.Close();
         }
@@ -37,17 +34,38 @@ namespace bai1
             var user = txtUsername.Text?.Trim() ?? string.Empty;
             var pass = txtPassword.Text ?? string.Empty;
 
-            // Simple credential check - change to your real auth if needed
-            if (string.Equals(user, DefaultUser, StringComparison.OrdinalIgnoreCase) && pass == DefaultPass)
+            try
             {
-                this.DialogResult = DialogResult.OK;
-                this.Close();
-                return;
+                if (AuthService.Verify(user, pass))
+                {
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                    return;
+                }
+            }
+            catch
+            {
             }
 
             MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.", "Đăng nhập thất bại", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             txtPassword.SelectAll();
             txtPassword.Focus();
+        }
+
+        private void lnkRegister_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            using (var dlg = new RegisterDialog())
+            {
+                dlg.ShowDialog(this);
+            }
+        }
+
+        private void lnkForgot_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            using (var dlg = new ResetPasswordDialog())
+            {
+                dlg.ShowDialog(this);
+            }
         }
     }
 }

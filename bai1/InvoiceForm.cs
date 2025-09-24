@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
+using System.ComponentModel;
 
 namespace bai1
 {
@@ -13,6 +14,11 @@ namespace bai1
         public InvoiceForm(List<Invoice> invoices)
         {
             _invoices = invoices ?? new List<Invoice>();
+
+            InitializeComponent();
+
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
 
             this.Text = "Danh sách hóa ??n";
             this.StartPosition = FormStartPosition.CenterParent;
@@ -29,6 +35,7 @@ namespace bai1
 
         private void PopulateList()
         {
+            if (listBox1 == null) return;
             listBox1.Items.Clear();
             foreach (var inv in _invoices)
             {
